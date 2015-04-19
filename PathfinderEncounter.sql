@@ -183,38 +183,46 @@ USE `PathfinderEncounter`$$
 CREATE DEFINER = DatabaseManager TRIGGER `PathfinderEncounter`.`Monster_BEFORE_INSERT` BEFORE INSERT ON `Monster` 
 FOR EACH ROW
 Begin
+-- Sets up the msg variable for calling errors and the found_it variable which performs different checks on data
 	DECLARE msg VARCHAR(255);
     DECLARE found_it INT;
+-- Checks to see if the size of the monster is in the appropriate categories
     IF NEW.size < -4 OR NEW.size > 4 THEN
 		set msg = "Error: Size categories must be an integer between -4 and 4";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
-        
+
+-- Checks to see if the alignment of the creature matches one of the 9 in game alignments        
 	IF NEW.alignment <> 'LG' OR NEW.alignment <> 'NG' OR NEW.alignment <> 'CG' OR NEW.alignment <> 'LN' OR NEW.alignment <> 'N' OR NEW.alignment <> 'CN' OR NEW.alignment <> 'LE' OR NEW.alignment <> 'NE' OR NEW.alignment <> 'CE' Then
 		set msg = "Error: Invalid input for alignment";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
-        
+
+-- Checks to see if the CR of the monster is within the database size of 1 to 10        
     IF NEW.CR < 1 OR NEW.CR > 10 THEN
 		set msg = "Error: Size categories must be an integer between -4 and 4";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;   
-        
+
+-- Checks to see if all armor class values are not less than 0 which is not allowed        
     IF NEW.Armor < 0 OR NEW.Shield < 0 OR New.Deflection < 0 OR NEW.NaturalArmor < 0 OR NEW.Dodge < 0 OR New.MiscAC < 0 Then   
         set msg = "Error: All Armor Class values must be greater than 0";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;  
-        
+
+-- Checks other values that are not able to be less than 0 are not less than 0        
     IF NEW.HitDie < 0 OR NEW.BaseSpeed < 0 OR New.Space < 0 OR NEW.Reach < 0 Then   
         set msg = "Error: Hit Die, Speed, Space, and Reach must be nonnegative";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;  
-        
+
+-- Minimum stat values are 0 so stat values cannot be less than 0        
       IF NEW.STR < 0 OR NEW.DEX < 0 OR New.CON < 0 OR NEW.INTE < 0 OR New.WIS < 0 OR NEW.CHA < 0 Then   
         set msg = "Error: Stats must be nonnegative";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
-        
+
+-- For all 5 attacks available for the monster if that attack type is not in the attack table, it is not able to be entered        
       SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
         WHERE Attack1 = NEW.Attack1;
         IF found_it = 0 THEN
@@ -253,39 +261,47 @@ Begin
 
 USE `PathfinderEncounter`$$
 CREATE DEFINER = DatabaseManager TRIGGER `PathfinderEncounter`.`Monster_BEFORE_UPDATE` BEFORE UPDATE ON `Monster` FOR EACH ROW
-    Begin
+Begin
+-- Sets up the msg variable for calling errors and the found_it variable which performs different checks on data
 	DECLARE msg VARCHAR(255);
     DECLARE found_it INT;
+-- Checks to see if the size of the monster is in the appropriate categories
     IF NEW.size < -4 OR NEW.size > 4 THEN
 		set msg = "Error: Size categories must be an integer between -4 and 4";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
-        
+
+-- Checks to see if the alignment of the creature matches one of the 9 in game alignments        
 	IF NEW.alignment <> 'LG' OR NEW.alignment <> 'NG' OR NEW.alignment <> 'CG' OR NEW.alignment <> 'LN' OR NEW.alignment <> 'N' OR NEW.alignment <> 'CN' OR NEW.alignment <> 'LE' OR NEW.alignment <> 'NE' OR NEW.alignment <> 'CE' Then
 		set msg = "Error: Invalid input for alignment";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
-        
+
+-- Checks to see if the CR of the monster is within the database size of 1 to 10        
     IF NEW.CR < 1 OR NEW.CR > 10 THEN
 		set msg = "Error: Size categories must be an integer between -4 and 4";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;   
-        
+
+-- Checks to see if all armor class values are not less than 0 which is not allowed        
     IF NEW.Armor < 0 OR NEW.Shield < 0 OR New.Deflection < 0 OR NEW.NaturalArmor < 0 OR NEW.Dodge < 0 OR New.MiscAC < 0 Then   
         set msg = "Error: All Armor Class values must be greater than 0";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;  
-        
+
+-- Checks other values that are not able to be less than 0 are not less than 0        
     IF NEW.HitDie < 0 OR NEW.BaseSpeed < 0 OR New.Space < 0 OR NEW.Reach < 0 Then   
         set msg = "Error: Hit Die, Speed, Space, and Reach must be nonnegative";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;  
-        
+
+-- Minimum stat values are 0 so stat values cannot be less than 0        
       IF NEW.STR < 0 OR NEW.DEX < 0 OR New.CON < 0 OR NEW.INTE < 0 OR New.WIS < 0 OR NEW.CHA < 0 Then   
         set msg = "Error: Stats must be nonnegative";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
-        
+
+-- For all 5 attacks available for the monster if that attack type is not in the attack table, it is not able to be entered        
       SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
         WHERE Attack1 = NEW.Attack1;
         IF found_it = 0 THEN
@@ -327,7 +343,8 @@ CREATE DEFINER = CURRENT_USER TRIGGER `PathfinderEncounter`.`Attacks_BEFORE_DELE
    begin
  	DECLARE msg VARCHAR(255);
     DECLARE found_it INT;
-    
+
+-- If someone tries to delete an attack from the table, if a current monster has that attack still, error is flagged    
        SELECT COUNT(1) INTO found_it FROM Monster.Attack1
         WHERE AttackName = NEW.AttackName;
         IF found_it = 0 THEN
@@ -368,7 +385,8 @@ USE `PathfinderEncounter`$$
 CREATE DEFINER = CURRENT_USER TRIGGER `PathfinderEncounter`.`Type_BEFORE_INSERT` BEFORE INSERT ON `Type` FOR EACH ROW
 Begin
 	DECLARE msg VARCHAR(255);
-    
+
+-- Minimum Hit die size for monsters is 1 thus value for hit die has to be 1 or greater    
     IF NEW.HitDie < 1 THEN
 		set msg = "Error: Size of Hit Die must be greater than 0";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
@@ -381,7 +399,8 @@ CREATE DEFINER = CURRENT_USER TRIGGER `PathfinderEncounter`.`Type_BEFORE_DELETE`
  begin
  	DECLARE msg VARCHAR(255);
     DECLARE found_it INT;
-    
+
+-- If monster in database has type to be deleted, error is flagged    
        SELECT COUNT(1) INTO found_it FROM Monster.TypeName
         WHERE TypeName = NEW.TypeName;
         IF found_it = 0 THEN
