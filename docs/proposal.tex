@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\lhead{EE568}
+\rhead{Project Proposal}
+
+\title{Pathfinder Role Playing Game\texttrademark Random Encounter Generator}
+\author{Padraic Cashin, David Yambay, and Hai Zhuh}
+\date{March 9, 2015}
+
+\begin{document}
+	\maketitle
+	\newpage
+
+	Pathfinder is a table-top role playing game developed by Paizo, similar to 
+	Dungeons and Dragons.  Managing random monster encounters is one of the most time
+	consuming, and difficult aspect of running the game, especially if the game master
+	wants to maintain a certain level of variety among the encounters.  
+
+	A good encounter should have the correct difficulty for the party, should contain 
+	monsters that are reasonable based on the current terrain, for example the generator
+	should never return polar bears if the players are currently in a arid desert, and 
+	should contain a good mix of different monsters across many encounters.  The game 
+	allows for this variety by allowing the game master to mix different monsters to 
+	generate an encounter up to a difficulty threshold, as well as add templates to any
+	of the monster, which change the effective level of the monster and augment its default
+	abilities.  Some monsters can also have class levels, similar to the players, which
+	could be added if time allows.
+
+	Our initial implementation should include an graphical interface that will handle the 
+	query creation and displaying of the encounter.  The database should contain a table 
+	of monsters, a table of templates, and a table of traits common to all monsters.  
+	Since monsters share many of same properties, those values could be moved into 
+	other tables or relations if it makes sense to do so.  For the initial database, 
+	it will contain the three tables, and a series of functions that will help us build 
+	a valid encounter.  The only input from the user should be encounter level, 
+	terrain type, preferred monster type and preferred templates. 
+
+	In order to create the database, we plan on using a web scraper to grab infomation
+	from the Pathfinder SRD.  This will allow us to populate the database quickly 
+	so we can focus on developing and testing the encounter generating functions of the data
+	base.  
+
+	Pathfinder Role Playing Game\texttrademark is released under the Open Gaming Licence (OGL). 
+\end{document}
