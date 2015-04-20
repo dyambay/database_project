@@ -376,19 +376,20 @@ CREATE DEFINER = CURRENT_USER TRIGGER `PathfinderEncounter`.`Type_BEFORE_DELETE`
 DELIMITER ;
 CREATE USER 'DatabaseManager' IDENTIFIED BY 'database';
 
-GRANT ALL ON `PathfinderEncounter`.* TO 'DatabaseManager';
-GRANT SELECT ON TABLE `PathfinderEncounter`.* TO 'DatabaseManager';
-GRANT SELECT, INSERT, TRIGGER ON TABLE `PathfinderEncounter`.* TO 'DatabaseManager';
-GRANT SELECT, INSERT, TRIGGER, UPDATE, DELETE ON TABLE `PathfinderEncounter`.* TO 'DatabaseManager';
-GRANT EXECUTE ON ROUTINE `PathfinderEncounter`.* TO 'DatabaseManager';
+GRANT ALL PRIVILEGES ON `PathfinderEncounter`.* TO 'DatabaseManager';
+FLUSH PRIVILEGES;
+
 CREATE USER 'User';
 
 GRANT SELECT ON TABLE `PathfinderEncounter`.* TO 'User';
+FLUSH PRIVILEGES;
+
 CREATE USER 'Engineer';
 
 GRANT SELECT, INSERT, TRIGGER ON TABLE `PathfinderEncounter`.* TO 'Engineer';
 GRANT SELECT, INSERT, TRIGGER, UPDATE, DELETE ON TABLE `PathfinderEncounter`.* TO 'Engineer';
 GRANT EXECUTE ON ROUTINE `PathfinderEncounter`.* TO 'Engineer';
+FLUSH PRIVILEGES;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
