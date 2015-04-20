@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+	"html/template"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi! I love %s!", r.URL.Path[1:])
+func view(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("pathfinder_form.html")
+	t.Execute(w, nil)
 }
 
 func main() {
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", view)
 	http.ListenAndServe(":8080", nil)
 }
