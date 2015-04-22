@@ -263,13 +263,13 @@ Begin
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
         
-	IF NEW.alignment <> 'LG' OR NEW.alignment <> 'NG' OR NEW.alignment <> 'CG' OR NEW.alignment <> 'LN' OR NEW.alignment <> 'N' OR NEW.alignment <> 'CN' OR NEW.alignment <> 'LE' OR NEW.alignment <> 'NE' OR NEW.alignment <> 'CE' Then
-		set msg = "Error: Invalid input for alignment";
+	IF NEW.alignment <> 'LG' AND NEW.alignment <> 'NG' AND NEW.alignment <> 'CG' AND NEW.alignment <> 'LN' AND NEW.alignment = 'N' AND NEW.alignment <> 'CN' AND NEW.alignment <> 'LE' AND NEW.alignment <> 'NE' AND NEW.alignment <> 'CE' Then
+        set msg = "Error: Invalid input for alignment";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
         
     IF NEW.CR < 1 OR NEW.CR > 10 THEN
-		set msg = "Error: Size categories must be an integer between -4 and 4";
+		set msg = "Error: CR must be an integer between 1 and 10";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;   
         
@@ -287,41 +287,52 @@ Begin
         set msg = "Error: Stats must be nonnegative";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
-        
-      SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
+      
+      if new.attack1 is not null then
+      SELECT COUNT(1) INTO found_it FROM Attacks
         WHERE AttackName = NEW.Attack1;
         IF found_it = 0 THEN
-			set msg = "Error: Attack type not in database. Contact Database Manager for Assistance";
+			set msg = new.attack1;
+			-- set msg = "Error: Attack1 type not in database. Contact Database Manager for Assistance";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;
-        
-	  SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
+        end if;
+      
+      if new.attack2 is not null then
+	  SELECT COUNT(1) INTO found_it FROM Attacks
         WHERE AttackName = NEW.Attack2;
         IF found_it = 0 THEN
-			set msg = "Error: Attack type not in database. Contact Database Manager for Assistance";
+			set msg = "Error: Attack2 type not in database. Contact Database Manager for Assistance";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;
-        
-      SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
+        end if; 
+       
+      if new.attack3 is not null then 
+      SELECT COUNT(1) INTO found_it FROM Attacks
         WHERE AttackName = NEW.Attack3;
         IF found_it = 0 THEN
-			set msg = "Error: Attack type not in database. Contact Database Manager for Assistance";
+			set msg = "Error: Attack3 type not in database. Contact Database Manager for Assistance";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;
+        end if;
       
-      SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
+      if new.attack4 is not null then
+      SELECT COUNT(1) INTO found_it FROM Attacks
         WHERE AttackName = NEW.Attack4;
         IF found_it = 0 THEN
-			set msg = "Error: Attack type not in database. Contact Database Manager for Assistance";
+			set msg = "Error: Attack4 type not in database. Contact Database Manager for Assistance";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;
-        
-  	  SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
+        end if;
+      
+      if new.attack5 is not null then
+  	  SELECT COUNT(1) INTO found_it FROM Attacks
         WHERE AttackName = NEW.Attack5;
         IF found_it = 0 THEN
-			set msg = "Error: Attack type not in database. Contact Database Manager for Assistance";
+			set msg = "Error: Attack5 type not in database. Contact Database Manager for Assistance";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
-        END IF;      
+        END IF;  
+        end if;
         END;$$
 
 USE `PathfinderEncounter`$$
@@ -334,13 +345,13 @@ CREATE DEFINER = DatabaseManager TRIGGER `PathfinderEncounter`.`Monster_BEFORE_U
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
         
-	IF NEW.alignment <> 'LG' OR NEW.alignment <> 'NG' OR NEW.alignment <> 'CG' OR NEW.alignment <> 'LN' OR NEW.alignment <> 'N' OR NEW.alignment <> 'CN' OR NEW.alignment <> 'LE' OR NEW.alignment <> 'NE' OR NEW.alignment <> 'CE' Then
-		set msg = "Error: Invalid input for alignment";
+	IF NEW.alignment <> 'LG' AND NEW.alignment <> 'NG' AND NEW.alignment <> 'CG' AND NEW.alignment <> 'LN' AND NEW.alignment = 'N' AND NEW.alignment <> 'CN' AND NEW.alignment <> 'LE' AND NEW.alignment <> 'NE' AND NEW.alignment <> 'CE' Then
+        set msg = "Error: Invalid input for alignment";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
         
     IF NEW.CR < 1 OR NEW.CR > 10 THEN
-		set msg = "Error: Size categories must be an integer between -4 and 4";
+		set msg = "Error: CR must be an integer between 1 and 10";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;   
         
@@ -358,84 +369,97 @@ CREATE DEFINER = DatabaseManager TRIGGER `PathfinderEncounter`.`Monster_BEFORE_U
         set msg = "Error: Stats must be nonnegative";
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
         END IF;
-        
-      SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
+      
+      if new.attack1 is not null then
+      SELECT COUNT(1) INTO found_it FROM Attacks
         WHERE AttackName = NEW.Attack1;
         IF found_it = 0 THEN
-			set msg = "Error: Attack type not in database. Contact Database Manager for Assistance";
+			set msg = new.attack1;
+			-- set msg = "Error: Attack1 type not in database. Contact Database Manager for Assistance";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;
-        
-	  SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
+        end if;
+      
+      if new.attack2 is not null then
+	  SELECT COUNT(1) INTO found_it FROM Attacks
         WHERE AttackName = NEW.Attack2;
         IF found_it = 0 THEN
-			set msg = "Error: Attack type not in database. Contact Database Manager for Assistance";
+			set msg = "Error: Attack2 type not in database. Contact Database Manager for Assistance";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;
-        
-      SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
+        end if; 
+       
+      if new.attack3 is not null then 
+      SELECT COUNT(1) INTO found_it FROM Attacks
         WHERE AttackName = NEW.Attack3;
         IF found_it = 0 THEN
-			set msg = "Error: Attack type not in database. Contact Database Manager for Assistance";
+			set msg = "Error: Attack3 type not in database. Contact Database Manager for Assistance";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;
+        end if;
       
-      SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
+      if new.attack4 is not null then
+      SELECT COUNT(1) INTO found_it FROM Attacks
         WHERE AttackName = NEW.Attack4;
         IF found_it = 0 THEN
-			set msg = "Error: Attack type not in database. Contact Database Manager for Assistance";
+			set msg = "Error: Attack4 type not in database. Contact Database Manager for Assistance";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;
-        
-  	  SELECT COUNT(1) INTO found_it FROM Attacks.AttackName
+        end if;
+      
+      if new.attack5 is not null then
+  	  SELECT COUNT(1) INTO found_it FROM Attacks
         WHERE AttackName = NEW.Attack5;
         IF found_it = 0 THEN
-			set msg = "Error: Attack type not in database. Contact Database Manager for Assistance";
+			set msg = "Error: Attack5 type not in database. Contact Database Manager for Assistance";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
-        END IF;      
+        END IF;  
+        end if;
         END;$$
 
+delimiter $$
 USE `PathfinderEncounter`$$
 CREATE DEFINER = CURRENT_USER TRIGGER `PathfinderEncounter`.`Attacks_BEFORE_DELETE` BEFORE DELETE ON `Attacks` FOR EACH ROW
    begin
- 	DECLARE msg VARCHAR(255);
+  	 	DECLARE msg VARCHAR(255);
     DECLARE found_it INT;
-    
-       SELECT COUNT(1) INTO found_it FROM Monster.Attack1, Attacks.AttackName
-        WHERE Attacks.AttackName = Monster.Attack1;
+  
+
+       SELECT COUNT(1) INTO found_it FROM Monster, attacks
+        WHERE attacks.attackname = Monster.Attack1;
         IF found_it = 0 THEN
 			set msg = "Error: Monster in database has attack and must be deleted before attack can be removed";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;
         
-       SELECT COUNT(1) INTO found_it FROM Monster.Attack2, Attacks.AttackName
-        WHERE Attacks.AttackName = Monster.Attack2;
+       SELECT COUNT(1) INTO found_it FROM Monster, attacks
+        WHERE attacks.attackname = Monster.Attack2;
         IF found_it = 0 THEN
 			set msg = "Error: Monster in database has attack and must be deleted before attack can be removed";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;
         
-       SELECT COUNT(1) INTO found_it FROM Monster.Attack3, Attacks.AttackName
-        WHERE Attacks.AttackName = Monster.Attack3;
+       SELECT COUNT(1) INTO found_it FROM Monster, attacks
+        WHERE attacks.attackname = Monster.Attack3;
         IF found_it = 0 THEN
 			set msg = "Error: Monster in database has attack and must be deleted before attack can be removed";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF; 
         
-       SELECT COUNT(1) INTO found_it FROM Monster.Attack4, Attacks.AttackName
-        WHERE Attacks.AttackName = Monster.Attack4;
+       SELECT COUNT(1) INTO found_it FROM Monster, attacks
+        WHERE attacks.attackname = Monster.Attack4;
         IF found_it = 0 THEN
 			set msg = "Error: Monster in database has attack and must be deleted before attack can be removed";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;      
         
-       SELECT COUNT(1) INTO found_it FROM Monster.Attack5, Attacks.AttackName
-        WHERE Attacks.AttackName = Monster.Attack1;
+       SELECT COUNT(1) INTO found_it FROM Monster, attacks
+        WHERE attacks.attackname = Monster.Attack5;
         IF found_it = 0 THEN
 			set msg = "Error: Monster in database has attack and must be deleted before attack can be removed";
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg; 
         END IF;     
-        End;  $$
+        End;$$
 
 USE `PathfinderEncounter`$$
 CREATE DEFINER = CURRENT_USER TRIGGER `PathfinderEncounter`.`Type_BEFORE_INSERT` BEFORE INSERT ON `Type` FOR EACH ROW
