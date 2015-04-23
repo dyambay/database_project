@@ -1,8 +1,10 @@
 package main
 
 import (
+//	"fmt"
 	"log"
 	"strings"
+	"strconv"
 	"net/http"
 	"html/template"
 	"database/sql"
@@ -11,49 +13,11 @@ import (
 
 type Monster struct  {
 	Name string
-	CR int
-	Alignment string
-	Size string
-	Type string
-	Init int
-	Armor int
-	Shield int
-	Deflection int
-	SizeAC int
-	NaturalArmor int
-	Dodge int
-	MiscAC int
-	HitDie int
-	Fort int
-	Reflex int
-	Will int
-	BaseSpeed int
-	Space int
-	Reach int
-	SpellAbilities string
-	Spell string
-	Str int
-	Dex int
-	Con int
-	Wis int
-	Int int
-	Cha int
-	BAB int
-	CMB int
-	CMD int
-	Feats string
-	Lang string
-	SpecAtt string
-	Environment string
-	Attack_1 string
-	Attack_2 string
-	Attack_3 string
-	Attack_4 string
-	Attack_5 string
-	Defense string
-	Offense string
-	Stats string
-	Special string
+	Basic template.HTML
+	Defense template.HTML
+	Offense template.HTML
+	Stats template.HTML
+	Special template.HTML
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
@@ -72,6 +36,7 @@ func queryHandler(w http.ResponseWriter, r *http.Request) {
 		cr string
 		environment string
 		type_ string = ""
+		table string
 	)
 
 	db, err := sql.Open("mysql", "root:W3iRd$_1tR#y@tcp(127.0.0.1:3306)/PathfinderEncounter")
@@ -85,7 +50,7 @@ func queryHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	query := "select Name, CR, Alignment, TypeName, Environment from PathfinderEncounter"
+	query := "select Name, CR, Alignment, TypeName, Environment from Monster"
 
 	alignment = r.FormValue("alignment")
 	cr = r.FormValue("cr")
@@ -93,7 +58,7 @@ func queryHandler(w http.ResponseWriter, r *http.Request) {
 	type_ = r.FormValue("type")
 
 	if alignment == "any" && environment == "any" && cr == "any" && type_ == "any" {
-		query = "select * from PathfinderEncounter"
+		query = "select Name, CR, Alignment, TypeName, Environment from Monster"
 	} else {
 		if alignment != "any" {
 			query += " where Alignment = '" + alignment + "'"
@@ -109,9 +74,9 @@ func queryHandler(w http.ResponseWriter, r *http.Request) {
 
 		if environment != "any" {
 			if strings.Contains(query, "where") {
-				query += " and Environment = " + environment + "'"
+				query += " and Environment = '" + environment + "'"
 			} else {
-				query += " where Environment = " + environment + "'"
+				query += " where Environment = '" + environment + "'"
 			}
 		}
 
@@ -140,7 +105,7 @@ func queryHandler(w http.ResponseWriter, r *http.Request) {
 				log.Fatal(err)
 			}
 			table += "<tr><td><a href=\"/monster/" + name + "\">" + name + "</a></td><td>"
-			table += cr + "</td><td>" + alignment + "</td><td>" + environment + "</td></tr>\n"
+			table += cr + "</td><td>" + alignment + "</td><td>" + type_ + "</td><td>" + environment + "</td></tr>\n"
 		}
 
 		err = rows.Err()
@@ -158,16 +123,72 @@ func dataHandler(w http.ResponseWriter, r *http.Request) {
 
 	s := loadMonster(name)
 
-	t, _ := template.ParseFiles("pretty_result.html")
+	t, _ := template.ParseFiles("pretty_results.html")
 	t.Execute(w, s)
 }
 
-func loadMonster(name string) *Monster {
-	var (
-		major string
-		year int
+func loadMonster(m_name string) *Monster {
+	var(
+		id []byte
+		name []byte
+		cr []byte
+		alignment []byte
+		size []byte
+		class []byte
+		type_ []byte
+		init []byte
+		armor []byte
+		shield []byte
+		deflection []byte
+		sizeAC []byte
+		naturalArmor []byte
+		dodge []byte
+		miscAC []byte
+		hitDie []byte
+		fort []byte
+		reflex []byte
+		will []byte
+		baseSpeed []byte
+		space []byte
+		reach []byte
+		spellAbilities []byte
+		spell []byte
+		str []byte
+		dex []byte
+		con []byte
+		wis []byte
+		int_ []byte
+		cha	[]byte
+		bAB []byte
+		cMB []byte
+		cMD []byte
+		feats []byte
+		skills []byte
+		lang []byte
+		specAtt []byte
+		environment []byte
+		attack_1 []byte
+		attack_2 []byte
+		attack_3 []byte
+		attack_4 []byte
+		attack_5 []byte
+		book []byte
+		basic string = ""
+		defense string = ""
+		offense string = ""
+		stats string = ""
+		special string = ""
+		hd_size int
+		m_size string
+		att_1 []byte
+		att_2 []byte
+		att_3 []byte
+		att_4 []byte
+		att_5 []byte
+		book_name []byte
 	)
 
+	//connect to database
 	db, err := sql.Open("mysql", "root:W3iRd$_1tR#y@tcp(127.0.0.1:3306)/PathfinderEncounter")
 	if err != nil {
 		log.Fatal(err)
@@ -178,7 +199,9 @@ func loadMonster(name string) *Monster {
 	if err != nil {
 		log.Fatal(err)
 	}
-	query := "select * from test where name = '" + name + "'"
+
+	//query for monster base information
+	query := "select * from Monster where name = '" + m_name + "'"
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -186,13 +209,285 @@ func loadMonster(name string) *Monster {
 	}
 	defer rows.Close()
 
+	//grab data from query
 	rows.Next()
-	err = rows.Scan(&name, &major, &year)
+	err = rows.Scan(&id,
+					&name,
+					&cr,
+					&alignment,
+					&size,
+					&class,
+					&type_,
+					&init,
+					&armor,
+					&shield,
+					&deflection,
+					&sizeAC,
+					&naturalArmor,
+					&dodge,
+					&miscAC,
+					&hitDie,
+					&fort,
+					&reflex,
+					&will,
+					&baseSpeed,
+					&space,
+					&reach,
+					&spellAbilities,
+					&spell,
+					&str,
+					&dex,
+					&con,
+					&int_,
+					&wis,
+					&cha,
+					&bAB,
+					&cMB,
+					&cMD,
+					&feats,
+					&skills,
+					&lang,
+					&specAtt,
+					&environment,
+					&attack_1,
+					&attack_2,
+					&attack_3,
+					&attack_4,
+					&attack_5,
+					&book)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return &Monster{Name: name, Major: major, Year: year}
+	//convert size from int to letter size
+	switch {
+		case string(size) == "-4":
+			m_size = "F"
+		case string(size) == "-3":
+			m_size = "D"
+		case string(size) == "-2":
+			m_size = "T"
+		case string(size) == "-1":
+			m_size = "S"
+		case string(size) == "0":
+			m_size = "M"
+		case string(size) == "1":
+			m_size = "L"
+		case string(size) == "2":
+			m_size = "H"
+		case string(size) == "3":
+			m_size = "C"
+		case string(size) == "4":
+			m_size = "G"
+		default:
+			m_size = "M"
+	}
+
+	//format basic information for pretty_results
+	basic += "<b>CR:</b> " + string(cr) + "<br>"
+	basic += string(name) + " " + string(type_) + "<br>"
+	basic += string(alignment) + " " + m_size + " " + string(type_) + "<br>"
+	basic += "<b>Initiative:</b> " + string(init) + "<br>"
+
+	//calculate values for Armor class
+	dex_base, err := strconv.Atoi(string(dex))
+	if err != nil {
+		dex_base = 0
+	}
+
+	dex_mod := (dex_base - 10) / 2
+	armor_mod, err := strconv.Atoi(string(armor))
+	if err != nil {
+		armor_mod = 0
+	}
+
+	shiel_mod, err := strconv.Atoi(string(shield))
+	if err != nil {
+		shiel_mod = 0
+	}
+
+	defle_mod, err := strconv.Atoi(string(deflection))
+	if err != nil {
+		defle_mod = 0
+	}
+
+	size_mod, err := strconv.Atoi(string(sizeAC))
+	if err != nil {
+		size_mod = 0
+	}
+
+	nata_mod, err := strconv.Atoi(string(naturalArmor))
+	if err != nil {
+		nata_mod = 0
+	}
+
+	dodge_mod, err := strconv.Atoi(string(dodge))
+	if err != nil {
+		dodge_mod = 0
+	}
+
+	misc_mod, err := strconv.Atoi(string(miscAC))
+	if err != nil {
+		misc_mod = 0
+	}
+
+	ac := armor_mod + shiel_mod + defle_mod + size_mod + nata_mod + dodge_mod + misc_mod + dex_mod + 10
+	touch := ac - armor_mod - shiel_mod
+	flatfoot := ac - dex_mod
+
+	//compile and format information for monster defense
+	defense += "<b>AC:</b> " + strconv.Itoa(ac) + " <b>Touch:</b> " + strconv.Itoa(touch) + " <b>Flat-footed:</b> " + strconv.Itoa(flatfoot) + "<br>"
+
+	query = "select HitDie from Type where TypeName = '" + string(type_) + "'"
+	rows, err = db.Query(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rows.Next()
+	err = rows.Scan(&hd_size)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defense += "<b>HP:</b> " + string(hitDie) + "d" + strconv.Itoa(hd_size) + "<br>"
+	defense += "<b>Fort:</b> " + string(fort) + " <b>Reflex:</b> " + string(reflex) + " <b>Will:</b> " + string(will) + "<br>"
+
+	//compile and format information for monster attack
+	offense += "<b>Speed:</b> " + string(baseSpeed) + "<br>"
+	offense += "<b>Attacks:</b><br>"
+
+	if string(attack_1) != "" {
+		query = "select " + m_size + " from Attacks where AttackName = '" + string(attack_1) + "'"
+		rows, err = db.Query(query)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		rows.Next()
+		err = rows.Scan(&att_1)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if string(att_1) != "" {
+			offense += string(attack_1) + " " + string(att_1) + "<br>"
+		}
+	}
+
+	if string(attack_2) != "" {
+		query = "select " + m_size + " from Attacks where AttackName = '" + string(attack_2) + "'"
+		rows, err = db.Query(query)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		rows.Next()
+		err = rows.Scan(&att_2)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if string(att_2) != "" {
+			offense += string(attack_2) + " " + string(att_2) + "<br>"
+		}
+	}
+
+	if string(attack_3) != "" {
+
+		query = "select " + m_size + " from Attacks where AttackName = '" + string(attack_3) + "'"
+		rows, err = db.Query(query)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		rows.Next()
+		err = rows.Scan(&att_3)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if string(att_3) != "" {
+			offense += string(attack_3) + " " + string(att_3) + "<br>"
+		}
+	}
+
+	if string(attack_4) != "" {
+		query = "select " + m_size + " from Attacks where AttackName = '" + string(attack_4) + "'"
+		rows, err = db.Query(query)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		rows.Next()
+		err = rows.Scan(&att_4)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if string(att_4) != "" {
+			offense += string(attack_4) + " " + string(att_4) + "<br>"
+		}
+	}
+
+	if string(attack_5) != "" {
+		query = "select " + m_size + " from Attacks where AttackName = '" + string(attack_5) + "'"
+		rows, err = db.Query(query)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		rows.Next()
+		err = rows.Scan(&att_5)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if string(att_5) != "" {
+			offense += string(attack_5) + " " + string(att_5) + "<br>"
+		}
+	}
+
+	offense += "<b>Special Attacks</b>: " + string(specAtt) + "<br>"
+	offense += "<b>Spell-like Abilities:</b> " + string(spellAbilities) + "<br>"
+	offense += "<b>Spells:</b> " + string(spell) + "<br>"
+
+	//compile and format monster statistics
+	stats += "<b>Str</b> " + string(str) + " "
+	stats += "<b>Dex</b> " + string(dex) + " "
+	stats += "<b>Con</b> " + string(con) + " "
+	stats += "<b>Int</b> " + string(int_) + " "
+	stats += "<b>Wis</b> " + string(wis) + " "
+	stats += "<b>Cha</b> " + string(cha) + "<br>"
+	stats += "<b>BAB</b> " + string(bAB) + " "
+	stats += "<b>CMB</b> " + string(cMB) + " "
+	stats += "<b>CMD</b> " + string(cMD) + "<br>"
+	stats += "<b>Feats:</b> " + string(feats) + "<br>"
+	stats += "<b>Skills:</b> " + string(skills) + "<br>"
+	stats += "<b>Languages:</b> " + string(lang) + "<br>"
+
+	query = "select BookName from Book where MonsterName = '" + string(name) + "'"
+	rows, err = db.Query(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rows.Next()
+	err = rows.Scan(&book_name)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	special += "Information provided by Pathfinder Role Playing Game " + string(book_name) + "<br>"
+	special += "Available under the OGL (Open Gaming License)"
+
+	return &Monster{Name: string(name),
+					Basic: template.HTML(basic),
+					Defense: template.HTML(defense),
+					Offense: template.HTML(offense),
+					Stats: template.HTML(stats),
+					Special: template.HTML(special)}
 }
 
 func main() {
