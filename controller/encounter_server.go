@@ -11,7 +11,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type Monster struct  {
+type MonsterData struct  {
 	Name string
 	Basic template.HTML
 	Defense template.HTML
@@ -20,10 +20,212 @@ type Monster struct  {
 	Special template.HTML
 }
 
-func viewHandler(w http.ResponseWriter, r *http.Request) {
+func newMonsterHandler(w http.ResponseWriter, r *http.Request) {
+
+	var (
+		max_id int
+		sizeVal int
+		sizeAC int
+	)
+
+	name := r.FormValue("name")
+	cr := r.FormValue("cr")
+	alignment := r.FormValue("alignment")
+	size := r.FormValue("size")
+	class := r.FormValue("class")
+	type_ := r.FormValue("type_")
+	armor := r.FormValue("armor")
+	shield := r.FormValue("shield")
+	deflection := r.FormValue("deflection")
+	naturalArmor := r.FormValue("naturalArmor")
+	dodge := r.FormValue("dodge")
+	miscAC := r.FormValue("miscAC")
+	hitdie := r.FormValue("hitdie")
+	fort := r.FormValue("fort")
+	reflex := r.FormValue("reflex")
+	will := r.FormValue("will")
+	speed := r.FormValue("speed")
+	space := r.FormValue("space")
+	reach := r.FormValue("reach")
+	spellabl := r.FormValue("spellabl")
+	spell := r.FormValue("spell")
+	str := r.FormValue("str")
+	dex := r.FormValue("dex")
+	con := r.FormValue("con")
+	wis := r.FormValue("wis")
+	int_ := r.FormValue("int_")
+	cha	 := r.FormValue("cha")
+	feat := r.FormValue("feat")
+	skill := r.FormValue("skill")
+	lang := r.FormValue("lang")
+	specatt := r.FormValue("specatt")
+	environment := r.FormValue("environment")
+	bab := r.FormValue("bab")
+	attack_1 := r.FormValue("att_1")
+	attack_2 := r.FormValue("att_2")
+	attack_3 := r.FormValue("att_3")
+	attack_4 := r.FormValue("att_4")
+	attack_5 := r.FormValue("att_5")
+	book := r.FormValue("book")
+
+	switch {
+		case size == "F":
+			sizeAC = 8
+			sizeVal = -4
+		case size == "D":
+			sizeAC = 4
+			sizeVal = -3
+		case size == "T":
+			sizeAC = 2
+			sizeVal = -2
+		case size == "S":
+			sizeAC = 1
+			sizeVal = -1
+		case size == "M":
+			sizeAC = 0
+			sizeVal = 0
+		case size == "L":
+			sizeAC = -1
+			sizeVal = 1
+		case size == "H":
+			sizeAC = -2
+			sizeVal = 2
+		case size == "C":
+			sizeAC = -4
+			sizeVal = 3
+		case size == "G":
+			sizeAC = -8
+			sizeVal = 4
+		default:
+			sizeAC = 0
+			sizeVal = 0
+	}
+
+	bab_n, _ := strconv.Atoi(bab)
+	str_n, _ := strconv.Atoi(str)
+	dex_n, _ := strconv.Atoi(dex)
+
+	cmb := bab_n + str_n
+	cmd := bab_n + str_n + dex_n + 10
+	init := (dex_n - 10)/2
+
+	db, err := sql.Open("mysql", "root:W3iRd$_1tR#y@tcp(127.0.0.1:3306)/PathfinderEncounter")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	query := "select max(idMonster) from Monster"
+	err = db.QueryRow(query).Scan(&max_id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	max_id++
+
+	book_insert := "INSERT INTO `PathfinderEncounter`.`Book` (`idBook`, `MonsterName`, `BookName`, `ThirdParty`) VALUES (?,?,?, 0)"
+
+	stmt, err := db.Prepare(book_insert)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(max_id, name, book)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	insert := "INSERT INTO `PathfinderEncounter`.`Monster` (`idMonster`,`Name`,`CR`,`Alignment`,`Size`,`Class`,`TypeName`,`Initiative`,`Armor`,`Shield`,`Deflection`,`SizeAC`,`NaturalArmor`,`Dodge`,`MiscAC`,`HitDie`,`Fort`,`Reflex`,`Will`,`BaseSpeed`,`Space`,`Reach`,`Spell-Like Abilities`,`Spells`,`Str`,`Dex`,`Con`,`Inte`,`Wis`,`Cha`,`BaseAttack`,`CMB`,`CMD`,`Feats`,`Skills`,`Languages`,`Special Attacks`,`Environment`,`Attack1`,`Attack2`,`Attack3`,`Attack4`,`Attack5`,`Book_idBook`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+
+	stmt, err = db.Prepare(insert)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = stmt.Exec(max_id,
+						name,
+						cr,
+						alignment,
+						sizeVal,
+						class,
+						type_,
+						init,
+						armor,
+						shield,
+						deflection,
+						sizeAC,
+						naturalArmor,
+						dodge,
+						miscAC,
+						hitdie,
+						fort,
+						reflex,
+						will,
+						speed,
+						space,
+						reach,
+						spellabl,
+						spell,
+						str,
+						dex,
+						con,
+						int_,
+						wis,
+						cha,
+						bab,
+						cmb,
+						cmd,
+						feat,
+						skill,
+						lang,
+						specatt,
+						environment,
+						attack_1,
+						attack_2,
+						attack_3,
+						attack_4,
+						attack_5,
+						max_id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	t, err := template.ParseFiles("confirm.html")
+	if err != nil {
+		http.Error(w, "Internal Sever Error", 500)
+		return
+	}
+	t.Execute(w, template.HTML(name))
+}
+
+func landingHandler(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("landing.html")
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+	t.Execute(w, nil)
+}
+
+func iformHandler(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("insert_form.html")
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+	t.Execute(w, nil)
+}
+
+func pformHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("pathfinder_form.html")
 	if err != nil {
-		http.Error(w, "Interal Server Error", 500)
+		http.Error(w, "Internal Server Error", 500)
 		return
 	}
 	t.Execute(w, nil)
@@ -114,20 +316,28 @@ func queryHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	t, _ := template.ParseFiles("monster_results.html")
+	t, err := template.ParseFiles("monster_results.html")
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
 	t.Execute(w, template.HTML(table))
 }
 
 func dataHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Path[len("/monster/"):]
 
-	s := loadMonster(name)
+	s := loadMonsterData(name)
 
-	t, _ := template.ParseFiles("pretty_results.html")
+	t, err := template.ParseFiles("pretty_results.html")
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
 	t.Execute(w, s)
 }
 
-func loadMonster(m_name string) *Monster {
+func loadMonsterData(m_name string) *MonsterData {
 	var(
 		id []byte
 		name []byte
@@ -482,7 +692,7 @@ func loadMonster(m_name string) *Monster {
 	special += "Information provided by Pathfinder Role Playing Game " + string(book_name) + "<br>"
 	special += "Available under the OGL (Open Gaming License)"
 
-	return &Monster{Name: string(name),
+	return &MonsterData{Name: string(name),
 					Basic: template.HTML(basic),
 					Defense: template.HTML(defense),
 					Offense: template.HTML(offense),
@@ -491,8 +701,11 @@ func loadMonster(m_name string) *Monster {
 }
 
 func main() {
+	http.HandleFunc("/confirm", newMonsterHandler)
 	http.HandleFunc("/monster/", dataHandler)
 	http.HandleFunc("/query", queryHandler)
-	http.HandleFunc("/", viewHandler)
+	http.HandleFunc("/find", pformHandler)
+	http.HandleFunc("/insert", iformHandler)
+	http.HandleFunc("/", landingHandler)
 	http.ListenAndServe(":8080", nil)
 }
